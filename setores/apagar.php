@@ -1,7 +1,7 @@
 <?php
 $servername = "localhost";
 $username = "root";
-$password = "Admin1@#";
+$password = "";
 $dbname = "renato";
 
 $id = $_GET["id"];
