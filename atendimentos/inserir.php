@@ -4,28 +4,26 @@ $username = "root";
 $password = "";
 $dbname = "renato";
 
-$nome = $_POST["nome"];
-$data = $_POST["data"];
-$id_setor = $_POST["id_setor"];
-
 try {
-  $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
-  // set the PDO error mode to exception
-  $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-  
-  
-  $sql = "INSERT INTO atendimentos (nome, data, id_setor) VALUES (?, ?, ?)";
-  $stmt = $conn->prepare($sql);
-  $stmt->bindParam(1, $nome);
-  $stmt->bindParam(2, $data);
-  $stmt->bindParam(3, $id_setor);
-  $stmt->execute();
-  
-  $last_id = $conn->lastInsertId();
-  echo "New record created successfully. Last inserted ID is: " . $last_id;
+    $nome = $_POST["nome"];
+    $data = $_POST["data"];
+    $id_setor = $_POST["id_setor"];
+
+    $conexao = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
+
+    $sql = "INSERT INTO atendimentos (nome, data, id_setor) VALUES (?, ?, ?)";
+    $consulta = $conexao->prepare($sql);
+    $consulta->bindParam(1, $nome);
+    $consulta->bindParam(2, $data);
+    $consulta->bindParam(3, $id_setor);
+    $consulta->execute();
+
+    $ultimo_id = $conexao->lastInsertId();
+
+    echo "Registro inserido com sucesso! ID: " . $ultimo_id;
 } catch(PDOException $e) {
-  echo $sql . "<br>" . $e->getMessage();
+    echo "<br>" . $e->getMessage();
 }
 
-$conn = null;
+$conexao = null;
 ?>
