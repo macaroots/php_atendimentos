@@ -5,7 +5,7 @@
         <th>Ações</th>
     </tr>
 <?php
-$servername = "localhost";
+$servername = "mysql";
 $username = "root";
 $password = "";
 $dbname = "renato";
