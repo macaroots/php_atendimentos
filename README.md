@@ -82,26 +82,84 @@ O PHP é uma linguagem que processa no servidor, um computador diferente do clie
 ```
 
 ### inserir.php
-Esta página recebe os dados de cada elemento `input` do formulário enviado pela página anterior. Por que estamos usando o método POST, os dados estão disponíveis através da lista associativa `$_POST`. Para evitar ataques de *SQL Injection*, substitua os valores por `?` e passe os valores usando o método `bindParam()`.
+Esta página recebe os dados de cada elemento `input` do formulário enviado pela página anterior. Uma vez que estamos usando o método POST, os dados estão disponíveis através da lista associativa `$_POST`.
 ```php
-try {
     $nome = $_POST["nome"];
     $data = $_POST["data"];
     $id_setor = $_POST["id_setor"];
+```
 
+Abrindo a conexão com o banco de dados. É preciso definir `$servername`, `$dbname`, `$username` e `$password`.
+```php
     $conexao = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
+```
 
+Para evitar ataques de *SQL Injection*, substitua os valores por `?`. Depois passe os valores usando o método `bindParam()`. Repare que `$sql` é uma variável com um texto simples contendo o comando SQL a ser executado.
+```php
     $sql = "INSERT INTO atendimentos (nome, data, id_setor) VALUES (?, ?, ?)";
     $consulta = $conexao->prepare($sql);
     $consulta->bindParam(1, $nome);
     $consulta->bindParam(2, $data);
     $consulta->bindParam(3, $id_setor);
     $consulta->execute();
-
-    $ultimo_id = $conexao->lastInsertId();
-
-    echo "Registro inserido com sucesso! ID: " . $ultimo_id;
-} catch(PDOException $e) {
-    echo "<br>" . $e->getMessage();
-}
 ```
+
+Recupere o id inserido com o método `lastInsertId()`.
+```php
+    $ultimo_id = $conexao->lastInsertId();
+```
+
+### listar.php
+Para começar, perceba que tem código PHP no meio da tabela HTML, o que não é uma boa prática. O ideal seria separar bem a lógica do visual. A tabela HTML sem o PHP ficaria assim:
+```php
+<table style='border: solid 1px black;'>
+    <tr>
+        <th>Id</th>
+        <th>Nome</th>
+        <th>Data</th>
+        <th>Setor</th>
+        <th>Ações</th>
+    </tr>
+    <tr>
+        <td>1</td>
+        <td>André</td>
+        <td>01/03/2021</td>
+        <td>1</td>
+        <td>
+            <a href="form_editar.php?id=1">editar</a>
+            <a href="apagar.php?id=1">apagar</a>
+        </td>
+    </tr>
+</table>
+```
+
+A tabela tem os cabeçalhos de cada coluna com a tag `<th>` e uma com um exemplo de registro. Seguem-se os mesmos passos anteriores: abrir a conexão, preparar a consulta e executar.
+```php
+    $conexao = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
+    $consulta = $conn->prepare("SELECT * FROM atendimentos");
+    $consulta->execute();
+```
+
+Em seguida, o PHP repete a linha da tabela HTML, enquanto houver registro.
+```php
+<?php
+    // ...
+    while ($row = $consulta->fetch()) {
+?>
+    <tr>
+        <td><?php echo $row['id']; ?></td>
+        <td><?php echo $row['nome']; ?></td>
+        <td><?php echo $row['data']; ?></td>
+        <td><?php echo $row['id_setor']; ?></td>
+        <td>
+            <a href="form_editar.php?id=<?php echo $row['id']; ?>">editar</a>
+            <a href="apagar.php?id=<?php echo $row['id']; ?>">apagar</a>
+        </td>
+    </tr>
+<?php
+    }
+    // ...
+?>
+```
+
+Repare como o PHP e o HTML aparecem intercalados. Cada um seguindo sua própria indentação.
